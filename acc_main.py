@@ -1,7 +1,7 @@
 # imports
 
 import streamlit as st
-# import streamlit_themes as st_theme
+import streamlit_themes as st_theme
 import pandas as pd
 import plotly.graph_objects as go
 import plotly.express as px
@@ -20,9 +20,9 @@ import feedparser
 
 
 ################################## THEMES AND LOOKS ############################
-# removed for deployment interference issues :(
+
 # apply a preset theme
-# st_theme.set_preset_theme('Beach')
+st_theme.set_preset_theme('Beach')
 pio.templates.default = "ggplot2"
 
 # page configuration
