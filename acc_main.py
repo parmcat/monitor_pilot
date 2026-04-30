@@ -6,7 +6,7 @@ import pandas as pd
 import plotly.graph_objects as go
 import plotly.express as px
 from datetime import datetime, timedelta
-import pandas_datareader as pdr
+#import pandas_datareader as pdr
 import plotly.io as pio
 import requests
 import numpy as np
