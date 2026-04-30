@@ -140,65 +140,10 @@ with tab_hmz:
             key="currency_selector"
         )
 
-    # time series visualization
-    st.subheader(f"{commodity} Price - Last 12 Months")
-
-    try:
-        end_date = datetime.now()
-        start_date = end_date - timedelta(days=365)
     
-        if "Oil" in commodity:
-            # fetch Brent crude oil prices
-            data = pdr.get_data_fred('DCOILBRENTEU', start=start_date, end=end_date)
-            data = data.dropna()
-            fred_code = 'DCOILBRENTEU'
-            unit = "/barrel"
-            line_color = '#1f77b4'
-        
-        else: # gas
-            # fetch natural gas prices
-            data = pdr.get_data_fred('DHHNGSP', start=start_date, end=end_date)
-            data = data.dropna()
-            fred_code = 'DHHNGSP'
-            unit = "/MMBtu"
-            line_color = '#ff7f0e'
     
-        if len(data) > 0:
-            # convert currency if needed
-            y_values = data[fred_code].values
-            if currency == "CNY (Yuan)":
-                y_values = y_values * USD_TO_CNY
-                currency_symbol = "¥"
-                currency_label = "CNY"
-            else:
-                currency_symbol = "$"
-                currency_label = "USD"
         
-            fig = go.Figure()
-            fig.add_trace(go.Scatter(
-                x=data.index,
-                y=y_values,
-                mode='lines',
-                name='Price',
-                line=dict(color=line_color, width=2),
-                hovertemplate=f'<b>%{{x|%Y-%m-%d}}</b><br>{currency_symbol}%{{y:.2f}}{unit}<extra></extra>'
-            ))
-        
-            fig.update_layout(
-                title=f"Live {commodity} Prices",
-                xaxis_title="Date",
-                yaxis_title=f"Price ({currency_label}{unit})",
-                hovermode='x unified',
-                height=500,
-                margin=dict(l=50, r=20, t=50, b=50)
-            )
-            st.plotly_chart(fig, use_container_width=True)
-        else:
-            st.error(f"No {commodity.lower()} price data available")
-        
-    except Exception as e:
-        st.error(f"Unable to fetch price data: {type(e).__name__}: {str(e)}")
-
+           
 ##################################################
 # stats 
     st.divider()
