@@ -1,4 +1,4 @@
-python=3.10.20
+python==3.10.20
 feedparser==6.0.12
 folium==0.20.0
 numpy==2.4.4
