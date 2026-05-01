@@ -117,30 +117,77 @@ with tab_hmz:
     st.markdown("""The Strait of Hormuz is a critical waterway separating Iran from other Persian Gulf countries, serving as a natural chokepoint due to its narrow breadth and relatively shallow, choppy waters. Approximately 21-30% of the world's petroleum-related trade passes through the Strait, which hosts several oil terminals where refined oil completes its journey and becomes ready for export. The region is also vital for natural gas extraction, given its proximity to major natural gas fields, and for seawater desalination infrastructure. While fuel's importance is widely recognized, many petroleum derivatives remain underappreciated despite their critical role in the global economy, including nitrogen fertilizers, clothing-grade polyester, consumer plastics, and numerous pharmaceutical goods such as solvents, binders, and drug coatings. Gulf countries depend heavily on water desalination because the region is naturally water-scarce, and demand has surged unprecedentedly in recent years. Paradoxically, some countries most in need of desalination cannot afford it, though for those that can, it is a lifeline. The Iranian government's armed blockade of the Strait has proven highly effective at raising prices across countless goods and services, pushing the global economy into a precarious situation. While some cargo ships have been permitted passage, only a fraction of necessary volume reaches global markets, leaving East and South Asian countries—which rely disproportionately on Gulf oil—particularly hard-hit. The U.S. naval blockade cannot operate within the Strait itself due to heavy fortification and insufficient depth for most US warships, so the "blockade-on-the-blockade" has been limited to the Gulf of Aden. This geographic constraint has catalyzed significant economic developments in the region, including the exchange of petroleum for Chinese Yuan instead of US Dollars, a major challenge to the petro-dollar system that historically tied petroleum exchanges to a single currency and enabled unilateral economic sanctions. Escalating tensions in the Bab al-Mandeb Strait of Yemen remain a concern, with potential to trigger a third conflict. For now, the Strait of Hormuz persists as a critical natural chokepoint for military and civilian vessels alike, creating a maritime danger zone that transcends the land borders of any single Gulf state. """)
     
     st.divider()
-    
-    
 
-    # exchange rate: 1 USD = 7.2 CNY
     USD_TO_CNY = 7.2
 
-    # create dropdown menus at the top
     col1, col2 = st.columns(2)
-
     with col1:
-        commodity = st.selectbox(
-            "Select Commodity",
-            options=["Oil (Brent Crude)", "Natural Gas (Henry Hub)"],
-            key="commodity_selector"
-        )
-
+        commodity = st.selectbox("Select Commodity", ["Oil (Brent Crude)", "Natural Gas (Henry Hub)"], key="commodity_selector")
     with col2:
-        currency = st.selectbox(
-            "Select Currency",
-            options=["USD", "CNY (Yuan)"],
-            key="currency_selector"
-        )
+        currency = st.selectbox("Select Currency", ["USD", "CNY (Yuan)"], key="currency_selector")
 
-    
+    st.subheader(f"{commodity} Price - Last 12 Months")
+
+    try:
+        # Load CSVs
+        if "Oil" in commodity:
+            df = pd.read_csv("DCOILBRENTEU.csv")
+            price_col = "DCOILBRENTEU"  # Adjust if your oil CSV has different column name
+            unit = "/barrel"
+            line_color = '#1f77b4'
+        else:
+            df = pd.read_csv("MHHNGSP.csv")
+            price_col = "MHHNGSP"
+            unit = "/MMBtu"
+            line_color = '#ff7f0e'
+
+        # Convert date column to datetime
+        df['observation_date'] = pd.to_datetime(df['observation_date'])
+        df = df.sort_values('observation_date')
+        
+        # Filter last 12 months
+        cutoff_date = datetime.now() - timedelta(days=365)
+        df = df[df['observation_date'] >= cutoff_date].copy()
+
+        if df.empty:
+            st.error(f"No {commodity.lower()} data available for the last 12 months")
+        else:
+            # Get price column and convert to numeric
+            prices = pd.to_numeric(df[price_col], errors='coerce')
+            df = df.dropna(subset=[price_col])
+            prices = prices.dropna()
+
+            if currency == "CNY (Yuan)":
+                prices = prices * USD_TO_CNY
+                currency_symbol = "¥"
+                currency_label = "CNY"
+            else:
+                currency_symbol = "$"
+                currency_label = "USD"
+
+            fig = go.Figure()
+            fig.add_trace(go.Scatter(
+                x=df['observation_date'],
+                y=prices.values,
+                mode='lines',
+                name='Price',
+                line=dict(color=line_color, width=2),
+                hovertemplate=f'<b>%{{x|%Y-%m-%d}}</b><br>{currency_symbol}%{{y:.2f}}{unit}<extra></extra>'
+            ))
+
+            fig.update_layout(
+                title=f"{commodity} Prices",
+                xaxis_title="Date",
+                yaxis_title=f"Price ({currency_label}{unit})",
+                hovermode='x unified',
+                height=500,
+                margin=dict(l=50, r=20, t=50, b=50)
+            )
+            st.plotly_chart(fig, use_container_width=True)
+
+    except Exception as e:
+        st.error("Unable to load price data.")
+        st.exception(e)
     
         
            
